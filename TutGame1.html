@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+</head>
+<body style="background-color: grey;">
+<canvas id="myCanvas" width="480" height="320" style="background-color: white;"></canvas>
+
+<script>
+//Set up canvas
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+
+//declarations
+var x = canvas.width/2;
+var y = canvas.height-30;
+var gameOver = false;
+//ball coords
+var dx = 2;
+var dy = -2;
+var ballRadius = 10;
+var padH = 10;
+var padW = 75;
+var padX = (canvas.width - padW)/2
+// controls
+var rPress = false;
+var lPress = false;
+// bricks
+var brickRows = 3;
+var brickColumns = 5;
+var brickW = 75;
+var brickH = 20;
+var brickPad = 10;
+var brickOffsetTop = 30;
+var brickOffsetLeft = 30;
+
+//place bricks
+var bricks = [];
+for(var c=0; c<brickColumns; c++) {
+  bricks[c] = [];
+  for (var r=0; r<brickRows; r++) {
+    bricks[c][r] = { x: 0, y: 0 };
+  }
+}
+//draw
+function ball() {
+  ctx.beginPath();
+  ctx.arc(x,y,ballRadius,0,Math.PI*2);
+  ctx.fillStyle = "#000000";
+  ctx.fill();
+  ctx.closePath();
+}
+function paddle() {
+  ctx.beginPath();
+  ctx.rect(padX, canvas.height - padH, padW, padH);
+  ctx.fillStyle = "#000000";
+  ctx.fill();
+  ctx.closePath();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ball();
+  paddle();
+  x += dx;
+  y += dy;
+
+  //boundries
+  if(x + dx < ballRadius || x + dx > canvas.width  - ballRadius) {
+    dx = -dx;
+  }
+
+  if(y + dy < ballRadius) {
+    dy = -dy;
+  } else if (y + dy > canvas.height-ballRadius) {
+    if(x > padX && x < padX + padW) { dy = -dy; }
+    else {
+      gameOverYeah();
+    }
+  }
+
+  if(rPress && padX < canvas.width - padW) { padX += 7; }
+  else if (lPress && padX > 0) { padX -=7; }
+}
+
+function gameOverYeah() {
+  clearInterval(interval);
+  ctx.rect(0,0,canvas.width,canvas.width);
+  ctx.fillStyle= "#000000";
+  ctx.fill();
+  ctx.closePath();
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+  ctx.font = "15px Arial";
+  ctx.fillText("Press spacebar to retry", canvas.width/2, canvas.height/2 + 40);
+}
+
+function keyDownHandler(e) {
+  if(e.key == "Right" || e.key == "ArrowRight") {
+    rPress = true;
+  }
+  else if (e.key == "Left" || e.key == "ArrowLeft") {
+    lPress = true;
+  }
+  else if (e.keyCode == 32 ) {
+    document.location.reload();
+    clearInterval(interval);
+  }
+}
+
+function keyUpHandler(e) {
+  if(e.key == "Right" || e.key == "ArrowRight") {
+    rPress = false;
+  }
+  else if (e.key == "Left" || e.key == "ArrowLeft") {
+    lPress = false;
+  }
+}
+
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+var interval = setInterval(draw, 10);
+
+</script>
+</body>
+</html>
